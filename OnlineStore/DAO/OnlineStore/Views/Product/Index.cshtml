@@ -1,0 +1,109 @@
+﻿@model OnlineStore.Models.ProductModel
+@{
+    ViewBag.Title = "Index";
+}
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: 'Product/GetListCategory',
+            type: 'POST',
+            contentType: 'application/json;',
+            success: function (list) {
+
+                var options = '';
+
+                for (var i = 0; i < list.length; i++)
+                    options += '<option value="' + list[i].Id + '">' + list[i].Category + '</option>';
+
+                document.getElementById('categorylist').innerHTML = options;
+            }
+        });
+
+
+    });
+    function SetCategory(a) {
+
+        var c = document.getElementById("IdCategory");
+        c.value = a;
+    }
+
+    function NewProduct() {
+        var producto = document.getElementById("idproducto").value
+        var precio = document.getElementById("idPrecio").value
+        var categoria = document.getElementById("categorylist").value
+
+        $.ajax({
+            url: 'Product/NewProductAjax',
+            type: 'POST',
+            contentType: 'application/json;',
+            data: JSON.stringify({ producto: producto, precio: precio, IdCategory: categoria }),
+            success: function (valid) {
+                window.location.href = "http://localhost:61602/Product";
+            }
+        });
+    }
+</script>
+
+<div class="col-md-12">
+    <div class="col-md-6" style="text-align:left; float:left">
+        <h2>Version Ajax</h2>
+        <div>
+            <table>
+                <tr>
+                    <td><input type="text" id="idproducto" placeholder="Producto" /></td>
+                </tr>
+                <tr><td><input type="text" id="idPrecio" placeholder="Precio" /></td></tr>
+                <tr>
+                    <td>
+                        <select id="categorylist" name="SelectedYear"></select>
+                    </td>
+                </tr>
+                <tr><td><button class="ps-btn ps-btn--sm" onclick="JavaScript: NewProduct()">Nuevo</button></td></tr>
+            </table>
+        </div>
+    </div>
+    <div class="col-md-6" style="text-align:right;float:right">
+        <h2>Version FormAction</h2>
+        <form action="@Url.Action("NewProduct", "Product")" method="post">
+            <div>
+                <div>
+                    @Html.LabelFor(l => l.Producto)
+                    @Html.TextBoxFor(p => p.Producto)
+                </div>
+                <div>
+                    @Html.LabelFor(l => l.Precio)
+                    @Html.TextBoxFor(p => p.Precio)
+                </div>
+                <div>
+                    @Html.Label("Categoria")
+                    @Html.DropDownListFor(c => c.Category, new SelectList(Model.Category, "Id", "Categoria"), new { @onchange = "SetCategory(this.value)" })
+                </div>
+
+                <div>
+                    <button type="submit">Nuevo</button>
+                </div>
+                @Html.HiddenFor(h => h.IdCategory)
+            </div>
+        </form>
+    </div>
+</div>
+<div style="float:none">
+    <br /><br />
+    <h2>Registros</h2>
+    <table class="table table-bordered table-responsive table-hover">
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+        </tr>
+        @foreach (var d in Model.pm)
+        {
+            <tr>
+                <td>@d.Id</td>
+                <td>@d.Producto</td>
+                <td>@d.Precio</td>
+            </tr>
+        }
+    </table>
+</div>
